@@ -30,24 +30,21 @@ public class Othello {
 	 * @param point
 	 */
 	public void playMove(Coordinate point) {
-		final char playerToken = blackMove ? 'B' : 'W';
-		final char opponentToken = blackMove ? 'W': 'B';
-		
 		Set<Coordinate> flips = new HashSet<>();
 		
-		flips.addAll(isEast(playerToken, opponentToken, point));
-		flips.addAll(isWest(playerToken, opponentToken, point));
-		flips.addAll(isNorth(playerToken, opponentToken, point));
-		flips.addAll(isSouth(playerToken, opponentToken, point));
-		flips.addAll(isNorthEast(playerToken, opponentToken, point));
-		flips.addAll(isNorthWest(playerToken, opponentToken, point));
-		flips.addAll(isSouthEast(playerToken, opponentToken, point));
-		flips.addAll(isSouthWest(playerToken, opponentToken, point));
+		flips.addAll(isEast(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isWest(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isNorth(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isSouth(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isNorthEast(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isNorthWest(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isSouthEast(getPlayerToken(), getOpponentToken(), point));
+		flips.addAll(isSouthWest(getPlayerToken(), getOpponentToken(), point));
 
-		boardData[point.Y][point.X] = playerToken;
+		boardData[point.Y][point.X] = getPlayerToken();
 		
 		for(Coordinate c : flips) {
-			boardData[c.Y][c.X] = playerToken;
+			boardData[c.Y][c.X] = getPlayerToken();
 		}
 		
 		blackMove = !blackMove;
@@ -60,13 +57,10 @@ public class Othello {
 	public Set<Coordinate> getAvailableMoves(){
 		Set<Coordinate> moves = new HashSet<Coordinate>();
 
-		final char playerToken = blackMove ? 'B' : 'W';
-		final char opponentToken = blackMove ? 'W': 'B';
-
 		for(int y = 0; y < boardData.length; y++) {
 			for(int x = 0; x < boardData[0].length; x++) {
 				//add all moves adjacent to opponent pieces
-				if(boardData[y][x] == opponentToken) {
+				if(boardData[y][x] == getOpponentToken()) {
 					moves.addAll(nearbyEmpty(new Coordinate(x, y)));
 				}
 			}
@@ -75,7 +69,7 @@ public class Othello {
 		Set<Coordinate> badMoves = new HashSet<Coordinate>();
 		
 		for(Coordinate c : moves) {
-			if(!validMove(playerToken, opponentToken, c))
+			if(!validMove(getPlayerToken(), getOpponentToken(), c))
 				badMoves.add(c);
 		}
 		
@@ -377,11 +371,23 @@ public class Othello {
 		return flips;
 	}
 	
+	public char getPlayerToken() {
+		return blackMove ? 'B' : 'W';
+	}
+	
+	public char getOpponentToken() {
+		return blackMove ? 'W': 'B';
+	}
+	
+	/**
+	 * Returns score of board.  Positive means black is winning, negative means white is winning.
+	 * @return
+	 */
 	public int boardScore() {
 		int total = 0;
 
-		for(int i = 0; i < boardData.length; i++) {
-			for(int j = 0; j < boardData[0].length; j++) {
+		for(int i = 0; i < BOARDSIZE; i++) {
+			for(int j = 0; j < BOARDSIZE; j++) {
 				switch(boardData[i][j]) {
 				case 'B':
 					total++;
@@ -411,15 +417,18 @@ public class Othello {
 		return out;
 	}
 	
+	/**
+	 * Alternate to string that also shows current available moves as lowercase letters.
+	 * @param availableMoves
+	 * @return
+	 */
 	public String toString(Set<Coordinate> availableMoves) {
 		String out = "";
-		final char playerToken = blackMove ? 'B' : 'W';
-		final char opponentToken = blackMove ? 'W': 'B';
-		
+
 		for(int i = 0; i < boardData.length; i++) {
 			for(int j = 0; j < boardData[0].length; j++) {
 				if(availableMoves.contains(new Coordinate(j, i))) {
-					out += Character.toLowerCase(playerToken) + " ";
+					out += Character.toLowerCase(getPlayerToken()) + " ";
 				}
 				else {
 					out += boardData[i][j] + " ";
