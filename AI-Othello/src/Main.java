@@ -38,17 +38,19 @@ public class Main {
 			int playerType = -1;
 			
 			if(game.blackMove) {
+				System.out.println("It's black's move.");
 				playerType = blackType;
 				
 			}
 			else { //white plays randomly
+				System.out.println("It's white's move.");
 				playerType = whiteType;
 			}
 			
 
 			//show board state
 			System.out.println(game.toString());
-			System.out.println("Score: " + game.boardScore());
+			System.out.println("Score: " + game.boardScore() + "\n");
 			
 			
 			switch(playerType) {
@@ -87,6 +89,13 @@ public class Main {
 			//calculate moves for next player
 			moves = game.getAvailableMoves();
 		}
+		
+		
+		System.out.println("\n\n****GAME OVER****");
+		System.out.println(game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN");
+		System.out.println(game.toString());
+		System.out.println("Score: " + game.boardScore() + "\n");
+		
 	}
 
 }
