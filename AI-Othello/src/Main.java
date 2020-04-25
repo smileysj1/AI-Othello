@@ -22,7 +22,8 @@ public class Main {
 		Scanner scan = new Scanner(System.in);
 		
 		
-		System.out.println("Welcome to Othello");
+		System.out.println("Welcome to Othello.");
+		System.out.println("Score > 0 means Black is winning.  Score < 0 means White is winning.");
 		System.out.println("Enter Black AI type (0: Human, 1: Random AI, 2: Minimax): ");
 		
 		int blackType = scan.nextInt();
@@ -47,7 +48,7 @@ public class Main {
 
 			//show board state
 			System.out.println(game.toString());
-			System.out.println(game.boardScore());
+			System.out.println("Score: " + game.boardScore());
 			
 			
 			switch(playerType) {
