@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Othello {
-	private static final int MAX_SEARCH_DEPTH = 5;
+	private static final int MAX_SEARCH_DEPTH = 4;
 
 	public final int BOARDSIZE = 8;
 
@@ -118,7 +118,7 @@ public class Othello {
 		int best = maxTurn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
 		//return a board score if we hit the search depth or there are no more legal moves
-		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return staticBoardHeuristic(board, originalPlayerToken);
+		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return playerScore(board, BOARDSIZE, originalPlayerToken);
 
 		for (Coordinate m : moves) {
 			//recurse to get the value of the next potential move
