@@ -18,7 +18,7 @@ public class Main {
 		System.out.println("Score > 0 means Black is winning.  Score < 0 means White is winning.");
 		
 		System.out.println("Enter Black AI type (0: Human, 1: Random AI, 2: Minimax): ");
-		int blackType = 2;
+		int blackType = 1;
 		
 		System.out.println("Enter White AI type (0: Human, 1: Random AI, 2: Minimax): ");
 		int whiteType = 2;
