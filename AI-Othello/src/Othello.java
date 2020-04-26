@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Othello {
-	private static final int MAX_SEARCH_DEPTH = 5;
+	private static final int MAX_SEARCH_DEPTH = 4;
 
 	public final int BOARDSIZE = 8;
 	

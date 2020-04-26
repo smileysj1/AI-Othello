@@ -11,9 +11,6 @@ public class Main {
 	
 	public static void main(String[] args) {
 
-		Othello game = new Othello();
-		Random rand = new Random();
-		Set<Coordinate> moves = game.getAvailableMoves();
 		Scanner scan = new Scanner(System.in);
 		
 		
@@ -21,29 +18,36 @@ public class Main {
 		System.out.println("Score > 0 means Black is winning.  Score < 0 means White is winning.");
 		
 		System.out.println("Enter Black AI type (0: Human, 1: Random AI, 2: Minimax): ");
-		int blackType = scan.nextInt();
+		int blackType = 2;
 		
 		System.out.println("Enter White AI type (0: Human, 1: Random AI, 2: Minimax): ");
-		int whiteType = scan.nextInt();
+		int whiteType = 2;
 		
-
+		int blackWin = 0;
+		int whiteWin = 0;
+		
+for(int test = 0; test < 1000; test++) {
+	Othello game = new Othello();
+	Random rand = new Random();
+	Set<Coordinate> moves = game.getAvailableMoves();
+	
 		while(!moves.isEmpty()) {
 			int playerType = -1;
 			
 			if(game.blackMove) {
-				System.out.println("It's black's move.");
+				//System.out.println("It's black's move.");
 				playerType = blackType;
 				
 			}
 			else { //white plays randomly
-				System.out.println("It's white's move.");
+				//System.out.println("It's white's move.");
 				playerType = whiteType;
 			}
 			
 
 			//show board state
-			System.out.println(game.toString());
-			System.out.println("Score: " + game.boardScore() + "\n");
+			//System.out.println(game.toString());
+			//System.out.println("Score: " + game.boardScore() + "\n");
 			
 			
 			switch(playerType) {
@@ -83,12 +87,19 @@ public class Main {
 			moves = game.getAvailableMoves();
 		}
 		
-		
+		if(game.boardScore() > 0) blackWin++;
+		if(game.boardScore() < 0) whiteWin++;
+
 		//print who won
-		System.out.println("\n\n****GAME OVER****");
+		System.out.println("\n\n****GAME " + test + " OVER****");
 		System.out.println(game.boardScore() == 0 ? "TIE" : (game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN"));
 		System.out.println(game.toString());
 		System.out.println("Score: " + game.boardScore() + "\n");
+		
+}
+
+
+System.out.println("Black Won: " + blackWin + "| White Won: " + whiteWin);
 		
 	}
 
