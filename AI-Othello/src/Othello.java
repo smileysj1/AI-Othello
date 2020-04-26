@@ -30,6 +30,7 @@ public class Othello {
 	public void playMove(Coordinate point) {
 		boardData = playMove(boardData, getPlayerToken(), point);
 		
+		//make it the other player's move
 		blackMove = !blackMove;
 	}
 	
@@ -41,6 +42,7 @@ public class Othello {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
 		Set<Coordinate> flips = new HashSet<>();
 		
+		//add all possible flips in each direction from the played piece
 		flips.addAll(isEast(tempBoard, getPlayerToken(), getOpponentToken(), point));
 		flips.addAll(isWest(tempBoard, getPlayerToken(), getOpponentToken(), point));
 		flips.addAll(isNorth(tempBoard, getPlayerToken(), getOpponentToken(), point));
@@ -52,6 +54,7 @@ public class Othello {
 
 		tempBoard[point.Y][point.X] = token;
 		
+		//set flips to the players token
 		for(Coordinate c : flips) {
 			tempBoard[c.Y][c.X] = token;
 		}
@@ -67,10 +70,10 @@ public class Othello {
 		int bestVal;
 		
 		//Set best based on if we are white or black
-		if(playerToken == 'B') {
+		if(playerToken == 'B') {	//Black plays for max score
 			bestVal = Integer.MIN_VALUE;
 		}
-		else {
+		else {						//White plays for min score
 			bestVal = Integer.MAX_VALUE;
 		}
 		
@@ -101,34 +104,60 @@ public class Othello {
 		return bestMove;
 	}
 	
+	/**
+	 * Recursively perform minimax to find the board value of a particular move.
+	 * @param board
+	 * The game board to use.
+	 * @param move
+	 * The move to evaluate.
+	 * @param playerToken
+	 * The player's current board token.
+	 * @param opToken
+	 * The opponent's board token.
+	 * @param searchDepth
+	 * The current depth of the recursion.
+	 * @param alpha
+	 * Current alpha threshold. (start at minimum integer)
+	 * @param beta
+	 * Current beta threshold. (start at maximum integer)
+	 * @param maxTurn
+	 * If it is currently the MAX player's turn.
+	 * @return
+	 */
 	public int getValueMoveMinimax(char[][] board, Coordinate move, char playerToken, char opToken, int searchDepth, int alpha, int beta, boolean maxTurn) {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
 		
+		//play the move to evaluate on a temp board.
 		tempBoard = playMove(tempBoard, playerToken, move);
 		
+		//get the next set of available moves
 		Set<Coordinate> moves = getAvailableMoves(tempBoard, playerToken, opToken);
 		
+		//initialize the current best value based on if it is min's turn or max's turn
 		int best = maxTurn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 		
+		//return a board score if we hit the search depth or there are no more legal moves
 		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return boardScore(board, BOARDSIZE);
 		
-		//Recurse down the tree
 		for (Coordinate m : moves) {
+			//recurse to get the value of the next potential move
 			int val = getValueMoveMinimax(tempBoard, m, opToken, playerToken, searchDepth + 1, alpha, beta, !maxTurn);
 			
-			if(maxTurn) {
+			if(maxTurn) {	//MAX
+				//set best and alpha if they update
 				best = Math.max(best, val);
 				alpha = Math.max(alpha, best);
 				
-				if(beta <= alpha) {
+				if(beta <= alpha) { //if the branch should be pruned, exit the loop
 					//System.out.println("branch pruned | alpha " + alpha + " | beta " + beta);
 					break;
 				}
-			}else {
+			}else {			//MIN
+				//set best and beta if they update
 				best = Math.min(best, val);
 				beta = Math.min(beta, best);
 				
-				if(beta <= alpha) {
+				if(beta <= alpha) { //if the branch should be pruned, exit the loop
 					//System.out.println("branch pruned | alpha " + alpha + " | beta " + beta);
 					break;
 				}

@@ -12,25 +12,18 @@ public class Main {
 	public static void main(String[] args) {
 
 		Othello game = new Othello();
-
-		System.out.println(game);	
-
 		Random rand = new Random();
-
 		Set<Coordinate> moves = game.getAvailableMoves();
-		
 		Scanner scan = new Scanner(System.in);
 		
 		
 		System.out.println("Welcome to Othello.");
 		System.out.println("Score > 0 means Black is winning.  Score < 0 means White is winning.");
-		System.out.println("Enter Black AI type (0: Human, 1: Random AI, 2: Minimax): ");
 		
+		System.out.println("Enter Black AI type (0: Human, 1: Random AI, 2: Minimax): ");
 		int blackType = scan.nextInt();
 		
-		
 		System.out.println("Enter White AI type (0: Human, 1: Random AI, 2: Minimax): ");
-		
 		int whiteType = scan.nextInt();
 		
 
