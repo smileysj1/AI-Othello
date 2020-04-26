@@ -8,7 +8,7 @@ public class Othello {
 	private static final int MAX_SEARCH_DEPTH = 5;
 
 	public final int BOARDSIZE = 8;
-	
+
 	char[][] boardData = new char[BOARDSIZE][BOARDSIZE];
 
 	boolean blackMove = true;
@@ -29,11 +29,11 @@ public class Othello {
 
 	public void playMove(Coordinate point) {
 		boardData = playMove(boardData, getPlayerToken(), point);
-		
+
 		//make it the other player's move
 		blackMove = !blackMove;
 	}
-	
+
 	/**
 	 * Plays a move at point and updates the game state accordingly.
 	 * @param point
@@ -41,7 +41,7 @@ public class Othello {
 	public char[][] playMove(char[][] board, char token, Coordinate point) {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
 		Set<Coordinate> flips = new HashSet<>();
-		
+
 		//add all possible flips in each direction from the played piece
 		flips.addAll(isEast(tempBoard, getPlayerToken(), getOpponentToken(), point));
 		flips.addAll(isWest(tempBoard, getPlayerToken(), getOpponentToken(), point));
@@ -53,57 +53,38 @@ public class Othello {
 		flips.addAll(isSouthWest(tempBoard, getPlayerToken(), getOpponentToken(), point));
 
 		tempBoard[point.Y][point.X] = token;
-		
+
 		//set flips to the players token
 		for(Coordinate c : flips) {
 			tempBoard[c.Y][c.X] = token;
 		}
-		
+
 		return tempBoard;
 	}
-	
+
 	public Coordinate getBestMoveMinimax(char[][] board, char playerToken, char opToken) {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
-		
+
 		Set<Coordinate> moves = getAvailableMoves(tempBoard, playerToken, opToken);
-		
-		int bestVal;
-		
-		//Set best based on if we are white or black
-		if(playerToken == 'B') {	//Black plays for max score
-			bestVal = Integer.MIN_VALUE;
-		}
-		else {						//White plays for min score
-			bestVal = Integer.MAX_VALUE;
-		}
-		
+
+		int bestVal = Integer.MIN_VALUE;
+
 		Coordinate bestMove = null;
-		
+
 		for(Coordinate move : moves) {
 			//pick highest value move
-			if(playerToken == 'B') {	//black wants higher scores
-				int val = getValueMoveMinimax(tempBoard, move, playerToken, opToken, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-				
-				if(val > bestVal) {
-					bestVal = val;
-					bestMove = move;
-				}
-			}
-			
-			if(playerToken == 'W') {	//white wants lower scores
-				int val = getValueMoveMinimax(tempBoard, move, playerToken, opToken, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-				
-				if(val < bestVal) {
-					bestVal = val;
-					bestMove = move;
-				}
+			int val = getValueMoveMinimax(tempBoard, move, playerToken, playerToken, opToken, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+
+			if(val > bestVal) {
+				bestVal = val;
+				bestMove = move;
 			}
 		}
-		
-		
+
+
 		return bestMove;
 	}
-	
+
 	/**
 	 * Recursively perform minimax to find the board value of a particular move.
 	 * @param board
@@ -124,30 +105,30 @@ public class Othello {
 	 * If it is currently the MAX player's turn.
 	 * @return
 	 */
-	public int getValueMoveMinimax(char[][] board, Coordinate move, char playerToken, char opToken, int searchDepth, int alpha, int beta, boolean maxTurn) {
+	public int getValueMoveMinimax(char[][] board, Coordinate move, char originalPlayerToken, char playerToken, char opToken, int searchDepth, int alpha, int beta, boolean maxTurn) {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
-		
+
 		//play the move to evaluate on a temp board.
 		tempBoard = playMove(tempBoard, playerToken, move);
-		
+
 		//get the next set of available moves
 		Set<Coordinate> moves = getAvailableMoves(tempBoard, playerToken, opToken);
-		
+
 		//initialize the current best value based on if it is min's turn or max's turn
 		int best = maxTurn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-		
+
 		//return a board score if we hit the search depth or there are no more legal moves
-		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return boardScore(board, BOARDSIZE);
-		
+		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return staticBoardHeuristic(board, originalPlayerToken);
+
 		for (Coordinate m : moves) {
 			//recurse to get the value of the next potential move
-			int val = getValueMoveMinimax(tempBoard, m, opToken, playerToken, searchDepth + 1, alpha, beta, !maxTurn);
-			
+			int val = getValueMoveMinimax(tempBoard, m, originalPlayerToken, opToken, playerToken, searchDepth + 1, alpha, beta, !maxTurn);
+
 			if(maxTurn) {	//MAX
 				//set best and alpha if they update
 				best = Math.max(best, val);
 				alpha = Math.max(alpha, best);
-				
+
 				if(beta <= alpha) { //if the branch should be pruned, exit the loop
 					//System.out.println("branch pruned | alpha " + alpha + " | beta " + beta);
 					break;
@@ -156,17 +137,41 @@ public class Othello {
 				//set best and beta if they update
 				best = Math.min(best, val);
 				beta = Math.min(beta, best);
-				
+
 				if(beta <= alpha) { //if the branch should be pruned, exit the loop
 					//System.out.println("branch pruned | alpha " + alpha + " | beta " + beta);
 					break;
 				}
 			}
 		}
-		
+
 		return best;
 	}
-	
+
+	public int staticBoardHeuristic(char[][] board, char playerToken) {
+		final int[][] weights = {
+				{4, -3, 2, 2, 2, 2, -3, 4},
+				{-3, -4, -1, -1, -1, -1, -4, -3},
+				{2, -1, 1, 0, 0, 1, -1, 2},
+				{2, -1, 0, 1, 1, 0, -1, 2},
+				{2, -1, 0, 1, 1, 0, -1, 2},
+				{2, -1, 1, 0, 0, 1, -1, 2},
+				{-3, -4, -1, -1, -1, -1, -4, -3},
+				{4, -3, 2, 2, 2, 2, -3, 4}
+		};
+
+		int total = 0;
+
+		for(int i = 0; i < weights.length; i++) {
+			for(int j = 0; j < weights.length; j++) {
+				if(board[i][j] == playerToken)
+					total += weights[i][j];
+			}
+		}
+
+		return total;
+	}
+
 	/**
 	 * Returns a set of all valid moves for the current game state.
 	 * @return
@@ -174,7 +179,7 @@ public class Othello {
 	public Set<Coordinate> getAvailableMoves(){
 		return getAvailableMoves(boardData, getPlayerToken(), getOpponentToken());
 	}
-	
+
 	public Set<Coordinate> getAvailableMoves(char[][] board, char playerToken, char opToken){
 		Set<Coordinate> moves = new HashSet<Coordinate>();
 
@@ -186,14 +191,14 @@ public class Othello {
 				}
 			}
 		}
-		
+
 		Set<Coordinate> badMoves = new HashSet<Coordinate>();
-		
+
 		for(Coordinate c : moves) {
 			if(!validMove(board, playerToken, opToken, c))
 				badMoves.add(c);
 		}
-		
+
 		moves.removeAll(badMoves);
 
 		return moves;
@@ -241,12 +246,12 @@ public class Othello {
 		if(point.X < boardData.length - 1 && point.Y > 0 && boardData[point.Y - 1][point.X + 1] == emptyToken) {
 			moves.add(new Coordinate(point.X + 1, point.Y - 1));
 		}
-		
+
 		//x - 1, y - 1
 		if(point.X > 0 && point.Y > 0 && boardData[point.Y - 1][point.X - 1] == emptyToken) {
 			moves.add(new Coordinate(point.X - 1, point.Y - 1));
 		}
-		
+
 		return moves;
 	}
 
@@ -267,7 +272,7 @@ public class Othello {
 				isSouthEast(board, playerToken, opToken, point).size() > 0 ||
 				isSouthWest(board, playerToken, opToken, point).size() > 0;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the east.
 	 * @param token
@@ -277,10 +282,10 @@ public class Othello {
 	 */
 	public Set<Coordinate> isEast(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int x = point.X + 1; x < boardData.length; x++) {
 			Coordinate c = new Coordinate(x, point.Y);
-			
+
 			if(boardData[c.Y][c.X] == token) {
 				return flips;
 			}
@@ -292,10 +297,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the west.
 	 * @param token
@@ -305,7 +310,7 @@ public class Othello {
 	 */
 	public Set<Coordinate> isWest(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int x = point.X - 1; x > 0; x--) {
 			Coordinate c = new Coordinate(x, point.Y);
 
@@ -320,10 +325,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the south.
 	 * @param token
@@ -333,7 +338,7 @@ public class Othello {
 	 */
 	public Set<Coordinate> isSouth(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int y = point.Y + 1; y < boardData.length; y++) {
 			Coordinate c = new Coordinate(point.X, y);
 
@@ -348,10 +353,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the north.
 	 * @param token
@@ -361,10 +366,10 @@ public class Othello {
 	 */
 	public Set<Coordinate> isNorth(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int y = point.Y - 1; y > 0; y--) {
 			Coordinate c = new Coordinate(point.X, y);
-			
+
 			if(boardData[c.Y][c.X] == token) {
 				return flips;
 			}
@@ -376,10 +381,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the southeast.
 	 * @param token
@@ -389,7 +394,7 @@ public class Othello {
 	 */
 	public Set<Coordinate> isSouthEast(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int i = 1; point.Y + i < BOARDSIZE && point.X + i < BOARDSIZE; i++) {
 			Coordinate c =  new Coordinate(point.X + i, point.Y + i);
 
@@ -404,10 +409,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the southwest.
 	 * @param token
@@ -417,10 +422,10 @@ public class Othello {
 	 */
 	public Set<Coordinate> isSouthWest(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int i = 1; point.Y + i < BOARDSIZE && point.X - i > 0; i++) {
 			Coordinate c = new Coordinate(point.X - i, point.Y + i);
-			
+
 			if(boardData[c.Y][c.X] == token) {
 				return flips;
 			}
@@ -432,10 +437,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the northeast.
 	 * @param token
@@ -445,10 +450,10 @@ public class Othello {
 	 */
 	public Set<Coordinate> isNorthEast(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int i = 1; point.Y - i > 0 && point.X + i < BOARDSIZE; i++) {
 			Coordinate c = new Coordinate(point.X + i, point.Y - i);
-	
+
 			if(boardData[c.Y][c.X] == token) {
 				return flips;
 			}
@@ -460,10 +465,10 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	/**
 	 * Returns flippable pieces between the point and the first token to the northwest.
 	 * @param token
@@ -473,10 +478,10 @@ public class Othello {
 	 */
 	public Set<Coordinate> isNorthWest(char[][] boardData, char token, char opToken, Coordinate point) {
 		Set<Coordinate> flips = new HashSet<Coordinate>();
-		
+
 		for(int i = 1; point.Y - i > 0 && point.X - i > 0; i++) {
 			Coordinate c = new Coordinate(point.X - i, point.Y - i);
-			
+
 			if(boardData[c.Y][c.Y] == token) {
 				return flips;
 			}
@@ -488,18 +493,18 @@ public class Othello {
 				return flips;
 			}
 		}
-		
+
 		return flips;
 	}
-	
+
 	public char getPlayerToken() {
 		return blackMove ? 'B' : 'W';
 	}
-	
+
 	public char getOpponentToken() {
 		return blackMove ? 'W': 'B';
 	}
-	
+
 	/**
 	 * Returns score of board.  Positive means black is winning, negative means white is winning.
 	 * @return
@@ -524,12 +529,12 @@ public class Othello {
 
 		return total;
 	}
-	
+
 	/**
 	 * Returns score of board.  Positive means black is winning, negative means white is winning.
 	 * @return
 	 */
-	public int boardScore(char[][] board, int boardsize) {
+	public static int boardScore(char[][] board, int boardsize) {
 		int total = 0;
 
 		for(int i = 0; i < boardsize; i++) {
@@ -550,15 +555,28 @@ public class Othello {
 		return total;
 	}
 	
+	public static int playerScore(char[][] board, int boardsize, char playerToken) {
+		int total = 0;
+
+		for(int i = 0; i < boardsize; i++) {
+			for(int j = 0; j < boardsize; j++) {
+				if(board[i][j] == playerToken)
+					total++;
+			}
+		}
+
+		return total;
+	}
+
 	public static char[][] copyBoard(char[][] board, int boardsize){
 		char[][] out = new char[boardsize][boardsize];
-		
+
 		for(int i = 0; i < boardsize; i++) {
 			for(int j = 0; j < boardsize; j++) {
 				out[i][j] = board[i][j];
 			}
 		}
-		
+
 		return out;
 	}
 
@@ -574,7 +592,7 @@ public class Othello {
 
 		return out;
 	}
-	
+
 	/**
 	 * Alternate to string that also shows current available moves as lowercase letters.
 	 * @param availableMoves
