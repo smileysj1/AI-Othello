@@ -67,21 +67,21 @@ public class Othello {
 		
 		Set<Coordinate> moves = getAvailableMoves(tempBoard, playerToken, opToken);
 		
-		int bestVal;
+		int bestVal = Integer.MIN_VALUE;
 		
 		//Set best based on if we are white or black
-		if(playerToken == 'B') {	//Black plays for max score
+		/*if(playerToken == 'B') {	//Black plays for max score
 			bestVal = Integer.MIN_VALUE;
 		}
 		else {						//White plays for min score
 			bestVal = Integer.MAX_VALUE;
-		}
+		}*/
 		
 		Coordinate bestMove = null;
 		
 		for(Coordinate move : moves) {
 			//pick highest value move
-			if(playerToken == 'B') {	//black wants higher scores
+			/*if(playerToken == 'B') {	//black wants higher scores
 				int val = getValueMoveMinimax(tempBoard, move, playerToken, opToken, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
 				
 				if(val > bestVal) {
@@ -97,6 +97,12 @@ public class Othello {
 					bestVal = val;
 					bestMove = move;
 				}
+			}*/
+			int val = getValueMoveMinimax(tempBoard, move, playerToken, playerToken, opToken, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+			
+			if(val > bestVal) {
+				bestVal = val;
+				bestMove = move;
 			}
 		}
 		
@@ -110,9 +116,9 @@ public class Othello {
 	 * The game board to use.
 	 * @param move
 	 * The move to evaluate.
-	 * @param playerToken
+	 * @param currentPlayerToken
 	 * The player's current board token.
-	 * @param opToken
+	 * @param currentOpToken
 	 * The opponent's board token.
 	 * @param searchDepth
 	 * The current depth of the recursion.
@@ -124,24 +130,24 @@ public class Othello {
 	 * If it is currently the MAX player's turn.
 	 * @return
 	 */
-	public int getValueMoveMinimax(char[][] board, Coordinate move, char playerToken, char opToken, int searchDepth, int alpha, int beta, boolean maxTurn) {
+	public int getValueMoveMinimax(char[][] board, Coordinate move, char originalTurn, char currentPlayerToken, char currentOpToken, int searchDepth, int alpha, int beta, boolean maxTurn) {
 		char[][] tempBoard = copyBoard(board, BOARDSIZE);
 		
 		//play the move to evaluate on a temp board.
-		tempBoard = playMove(tempBoard, playerToken, move);
+		tempBoard = playMove(tempBoard, currentPlayerToken, move);
 		
 		//get the next set of available moves
-		Set<Coordinate> moves = getAvailableMoves(tempBoard, playerToken, opToken);
+		Set<Coordinate> moves = getAvailableMoves(tempBoard, currentPlayerToken, currentOpToken);
 		
 		//initialize the current best value based on if it is min's turn or max's turn
 		int best = maxTurn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 		
 		//return a board score if we hit the search depth or there are no more legal moves
-		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return boardScore(board, BOARDSIZE);
+		if(moves.isEmpty() || searchDepth == MAX_SEARCH_DEPTH) return cornerHeuristicValue(board, BOARDSIZE, originalTurn);
 		
 		for (Coordinate m : moves) {
 			//recurse to get the value of the next potential move
-			int val = getValueMoveMinimax(tempBoard, m, opToken, playerToken, searchDepth + 1, alpha, beta, !maxTurn);
+			int val = getValueMoveMinimax(tempBoard, m, originalTurn, currentOpToken, currentPlayerToken, searchDepth + 1, alpha, beta, !maxTurn);
 			
 			if(maxTurn) {	//MAX
 				//set best and alpha if they update
@@ -165,6 +171,35 @@ public class Othello {
 		}
 		
 		return best;
+	}
+	
+	public int cornerHeuristicValue(char[][] board, int boardSize, char playerToken) {
+		char opToken = ' ';
+		
+		if(playerToken == 'B') opToken = 'W';
+		if(playerToken == 'W') opToken = 'B';
+		
+		int playerCorners = 0;
+		int opCorners = 0;
+		
+		char topLeft = board[0][0];
+		char topRight = board[0][boardSize - 1];
+		char bottomLeft = board[boardSize - 1][0];
+		char bottomRight = board[boardSize - 1][boardSize - 1];
+		
+		if(topLeft == playerToken) playerCorners++;
+		if(topRight == playerToken) playerCorners++;
+		if(bottomLeft == playerToken) playerCorners++;
+		if(bottomRight == playerToken) playerCorners++;
+		
+		if(topLeft == opToken) opCorners++;
+		if(topRight == opToken) opCorners++;
+		if(bottomLeft == opToken) opCorners++;
+		if(bottomRight == opToken) opCorners++;
+		
+		if(playerCorners + opCorners == 0) return 0;
+		
+		return 100 * ((playerCorners - opCorners) / (playerCorners + opCorners));
 	}
 	
 	/**
