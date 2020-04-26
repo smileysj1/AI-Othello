@@ -91,8 +91,9 @@ public class Main {
 		}
 		
 		
+		//print who won
 		System.out.println("\n\n****GAME OVER****");
-		System.out.println(game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN");
+		System.out.println(game.boardScore() == 0 ? "TIE" : (game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN"));
 		System.out.println(game.toString());
 		System.out.println("Score: " + game.boardScore() + "\n");
 		
