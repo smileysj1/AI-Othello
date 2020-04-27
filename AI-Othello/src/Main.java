@@ -43,7 +43,6 @@ public class Main {
 
 			//show board state
 			System.out.println(game.toString());
-			System.out.println("Score: " + game.boardScore() + "\n");
 			
 			
 			switch(playerType) {
@@ -85,10 +84,13 @@ public class Main {
 		
 		
 		//print who won
+		int blackScore = Othello.playerScore(game.boardData, Othello.BOARDSIZE, 'B');
+		int whiteScore = Othello.playerScore(game.boardData, Othello.BOARDSIZE, 'W');
+		
+		
 		System.out.println("\n\n****GAME OVER****");
-		System.out.println(game.boardScore() == 0 ? "TIE" : (game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN"));
+		System.out.println(blackScore == whiteScore ? "TIE" : (blackScore > whiteScore ? "BLACK WIN" : "WHITE WIN"));
 		System.out.println(game.toString());
-		System.out.println("Score: " + game.boardScore() + "\n");
 		
 	}
 
