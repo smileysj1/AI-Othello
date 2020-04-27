@@ -7,7 +7,7 @@ import java.util.Set;
 public class Othello {
 	private static final int MAX_SEARCH_DEPTH = 4;
 
-	public final int BOARDSIZE = 8;
+	public static final int BOARDSIZE = 8;
 
 	char[][] boardData = new char[BOARDSIZE][BOARDSIZE];
 
@@ -504,56 +504,6 @@ public class Othello {
 	public char getOpponentToken() {
 		return blackMove ? 'W': 'B';
 	}
-
-	/**
-	 * Returns score of board.  Positive means black is winning, negative means white is winning.
-	 * @return
-	 */
-	public int boardScore() {
-		int total = 0;
-
-		for(int i = 0; i < BOARDSIZE; i++) {
-			for(int j = 0; j < BOARDSIZE; j++) {
-				switch(boardData[i][j]) {
-				case 'B':
-					total++;
-					break;
-				case 'W':
-					total--;
-					break;
-				default:
-					break;
-				}
-			}
-		}
-
-		return total;
-	}
-
-	/**
-	 * Returns score of board.  Positive means black is winning, negative means white is winning.
-	 * @return
-	 */
-	public static int boardScore(char[][] board, int boardsize) {
-		int total = 0;
-
-		for(int i = 0; i < boardsize; i++) {
-			for(int j = 0; j < boardsize; j++) {
-				switch(board[i][j]) {
-				case 'B':
-					total++;
-					break;
-				case 'W':
-					total--;
-					break;
-				default:
-					break;
-				}
-			}
-		}
-
-		return total;
-	}
 	
 	public static int playerScore(char[][] board, int boardsize, char playerToken) {
 		int total = 0;
@@ -589,6 +539,8 @@ public class Othello {
 			}
 			out += "\n";
 		}
+		
+		out += "Black: " + playerScore(boardData, BOARDSIZE, 'B') + " White: " + playerScore(boardData, BOARDSIZE, 'W');
 
 		return out;
 	}

@@ -26,7 +26,7 @@ public class Main {
 		int blackWin = 0;
 		int whiteWin = 0;
 		
-for(int test = 0; test < 1000; test++) {
+for(int test = 0; test < 100; test++) {
 	Othello game = new Othello();
 	Random rand = new Random();
 	Set<Coordinate> moves = game.getAvailableMoves();
@@ -87,14 +87,16 @@ for(int test = 0; test < 1000; test++) {
 			moves = game.getAvailableMoves();
 		}
 		
-		if(game.boardScore() > 0) blackWin++;
-		if(game.boardScore() < 0) whiteWin++;
-
 		//print who won
-		System.out.println("\n\n****GAME " + test + " OVER****");
-		System.out.println(game.boardScore() == 0 ? "TIE" : (game.boardScore() > 0 ? "BLACK WIN" : "WHITE WIN"));
+		int blackScore = Othello.playerScore(game.boardData, Othello.BOARDSIZE, 'B');
+		int whiteScore = Othello.playerScore(game.boardData, Othello.BOARDSIZE, 'W');
+				
+		if(blackScore > whiteScore) blackWin++;
+		if(blackScore < whiteScore) whiteWin++;
+				
+		System.out.println("\n\n****GAME "+ test +" OVER****");
+		System.out.println(blackScore == whiteScore ? "TIE" : (blackScore > whiteScore ? "BLACK WIN" : "WHITE WIN"));
 		System.out.println(game.toString());
-		System.out.println("Score: " + game.boardScore() + "\n");
 		
 }
 
